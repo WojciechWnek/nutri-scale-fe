@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, Suspense, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/auth/Button';
@@ -9,28 +9,47 @@ import { Input } from '@/components/auth/Input';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 
 function EmailVerifyContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { verifyEmail } = useAuth();
   const email = searchParams.get('email') || '';
+  const token = searchParams.get('token') || '';
   const [verificationToken, setVerificationToken] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [autoVerified, setAutoVerified] = useState(false);
 
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (token && !autoVerified) {
+      setIsLoading(true);
+      verifyEmail({ token })
+        .then((result) => {
+          if (result.success) {
+            setSuccess(true);
+            setAutoVerified(true);
+          } else {
+            setError(result.message || 'Verification failed');
+          }
+        })
+        .catch(() => {
+          setError('An error occurred. Please try again.');
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
+  }, [token, autoVerified, verifyEmail]);
+
+  const handleVerify = async (tokenToVerify: string) => {
     setError('');
     setIsLoading(true);
 
     try {
-      const result = await verifyEmail({ token: verificationToken });
+      const result = await verifyEmail({ token: tokenToVerify });
       
       if (result.success) {
         setSuccess(true);
-        setTimeout(() => {
-          router.push('/signin');
-        }, 3000);
+        setAutoVerified(true);
       } else {
         setError(result.message || 'Verification failed');
       }
@@ -39,6 +58,11 @@ function EmailVerifyContent() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleManualVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await handleVerify(verificationToken);
   };
 
   if (success) {
@@ -51,7 +75,7 @@ function EmailVerifyContent() {
             </svg>
           </div>
           <p className="text-gray-600 dark:text-gray-400">
-            Redirecting you to sign in...
+            {token ? 'Your email has been verified. You can now sign in.' : 'Redirecting you to sign in...'}
           </p>
           <Link href="/signin">
             <Button variant="outline">Sign in now</Button>
@@ -61,9 +85,19 @@ function EmailVerifyContent() {
     );
   }
 
+  if (token && isLoading) {
+    return (
+      <AuthLayout title="Verifying your email" subtitle="Please wait...">
+        <div className="text-center">
+          <div className="w-8 h-8 mx-auto border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </AuthLayout>
+    );
+  }
+
   return (
     <AuthLayout title="Verify your email" subtitle={email ? `We sent a verification code to ${email}` : 'Enter the verification code'}>
-      <form onSubmit={handleVerify} className="space-y-5">
+      <form onSubmit={handleManualVerify} className="space-y-5">
         {error && (
           <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg">
             {error}
@@ -73,11 +107,10 @@ function EmailVerifyContent() {
         <Input
           type="text"
           label="Verification code"
-          placeholder="Enter 6-digit code"
+          placeholder="Enter verification code"
           value={verificationToken}
           onChange={(e) => setVerificationToken(e.target.value)}
           required
-          maxLength={6}
           className="text-center tracking-widest text-xl font-mono"
         />
 
