@@ -63,6 +63,7 @@ export default function SignInPage() {
           onChange={(e) => setPassword(e.target.value)}
           required
           autoComplete="current-password"
+          showPasswordToggle
         />
 
         <div className="flex items-center justify-end">

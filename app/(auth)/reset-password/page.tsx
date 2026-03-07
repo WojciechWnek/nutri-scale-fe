@@ -95,6 +95,7 @@ function ResetPasswordContent() {
           onChange={(e) => setPassword(e.target.value)}
           required
           autoComplete="new-password"
+          showPasswordToggle
         />
 
         <Input
@@ -105,6 +106,7 @@ function ResetPasswordContent() {
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
           autoComplete="new-password"
+          showPasswordToggle
         />
 
         <Button type="submit" className="w-full" size="lg" isLoading={isLoading}>

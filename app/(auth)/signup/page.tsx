@@ -1,34 +1,34 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
-import { Input } from '@/components/auth/Input';
-import { Button } from '@/components/auth/Button';
-import { AuthLayout } from '@/components/auth/AuthLayout';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
+import { Input } from "@/components/auth/Input";
+import { Button } from "@/components/auth/Button";
+import { AuthLayout } from "@/components/auth/AuthLayout";
 
 export default function SignUpPage() {
   const router = useRouter();
   const { register } = useAuth();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       return;
     }
 
     if (password.length < 8) {
-      setError('Password must be at least 8 characters');
+      setError("Password must be at least 8 characters");
       return;
     }
 
@@ -36,14 +36,15 @@ export default function SignUpPage() {
 
     try {
       const result = await register({ name, email, password });
-      
+
       if (result.success) {
-        router.push('/email-verify?email=' + encodeURIComponent(email));
+        router.push("/email-verify?email=" + encodeURIComponent(email));
       } else {
-        setError(result.message || 'Registration failed');
+        setError(result.message || "Registration failed");
       }
-    } catch {
-      setError('An error occurred. Please try again.');
+    } catch (error) {
+      console.log("Registration error:", error);
+      setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -86,6 +87,7 @@ export default function SignUpPage() {
           onChange={(e) => setPassword(e.target.value)}
           required
           autoComplete="new-password"
+          showPasswordToggle
         />
 
         <Input
@@ -96,14 +98,20 @@ export default function SignUpPage() {
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
           autoComplete="new-password"
+          showPasswordToggle
         />
 
-        <Button type="submit" className="w-full" size="lg" isLoading={isLoading}>
+        <Button
+          type="submit"
+          className="w-full"
+          size="lg"
+          isLoading={isLoading}
+        >
           Create account
         </Button>
 
         <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-          Already have an account?{' '}
+          Already have an account?{" "}
           <Link
             href="/signin"
             className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
