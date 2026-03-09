@@ -1,125 +1,221 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import * as React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";
-import { Input } from "@/components/auth/Input";
-import { Button } from "@/components/auth/Button";
+import { z } from "zod";
+import { authService } from "@/services/auth.service";
 import { AuthLayout } from "@/components/auth/AuthLayout";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
+
+const signUpSchema = z
+  .object({
+    name: z.string().min(2, "Name must be at least 2 characters"),
+    email: z.string().email("Please enter a valid email address"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 export default function SignUpPage() {
-  const router = useRouter();
-  const { register } = useAuth();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = React.useState<string>("");
+  const [success, setSuccess] = React.useState(false);
+  const [email, setEmail] = React.useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+  const form = useForm<SignUpFormValues>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
+  const { isSubmitting } = form.formState;
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters");
-      return;
-    }
-
-    setIsLoading(true);
+  async function onSubmit(data: SignUpFormValues) {
+    setServerError("");
 
     try {
-      const result = await register({ name, email, password });
+      const result = await authService.signup({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      });
 
       if (result.success) {
-        router.push("/email-verify?email=" + encodeURIComponent(email));
+        setEmail(data.email);
+        setSuccess(true);
       } else {
-        setError(result.message || "Registration failed");
+        setServerError(result.message || "Registration failed");
       }
     } catch (error) {
       console.log("Registration error:", error);
-      setError("An error occurred. Please try again.");
-    } finally {
-      setIsLoading(false);
+      setServerError("An error occurred. Please try again.");
     }
-  };
+  }
+
+  if (success) {
+    return (
+      <AuthLayout
+        title="Check your email"
+        subtitle="We've sent you a verification link"
+      >
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 mx-auto bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+            <svg
+              className="w-8 h-8 text-blue-600 dark:text-blue-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              />
+            </svg>
+          </div>
+          <p className="text-gray-600 dark:text-gray-400">
+            We have sent a verification link to{" "}
+            <span className="font-medium text-gray-900 dark:text-white">
+              {email}
+            </span>
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Please verify your email before signing in.
+          </p>
+          <Link href="/signin">
+            <Button variant="outline" className="mt-4">
+              Go to Sign in
+            </Button>
+          </Link>
+        </div>
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout title="Create an account" subtitle="Start your journey with us">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg">
-            {error}
-          </div>
-        )}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          {serverError && (
+            <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              {serverError}
+            </div>
+          )}
 
-        <Input
-          type="text"
-          label="Full name"
-          placeholder="John Doe"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          autoComplete="name"
-        />
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Full name</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="John Doe"
+                    autoComplete="name"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <Input
-          type="email"
-          label="Email address"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          autoComplete="email"
-        />
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email address</FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <Input
-          type="password"
-          label="Password"
-          placeholder="Create a password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          autoComplete="new-password"
-          showPasswordToggle
-        />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <PasswordInput
+                    placeholder="Create a password"
+                    autoComplete="new-password"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <Input
-          type="password"
-          label="Confirm password"
-          placeholder="Confirm your password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-          autoComplete="new-password"
-          showPasswordToggle
-        />
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Confirm password</FormLabel>
+                <FormControl>
+                  <PasswordInput
+                    placeholder="Confirm your password"
+                    autoComplete="new-password"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <Button
-          type="submit"
-          className="w-full"
-          size="lg"
-          isLoading={isLoading}
-        >
-          Create account
-        </Button>
-
-        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-          Already have an account?{" "}
-          <Link
-            href="/signin"
-            className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+          <Button
+            type="submit"
+            className="w-full"
+            size="lg"
+            isLoading={isSubmitting}
           >
-            Sign in
-          </Link>
-        </p>
-      </form>
+            Create account
+          </Button>
+
+          <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+            Already have an account?{" "}
+            <Link
+              href="/signin"
+              className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+            >
+              Sign in
+            </Link>
+          </p>
+        </form>
+      </Form>
     </AuthLayout>
   );
 }

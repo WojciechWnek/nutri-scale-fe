@@ -3,14 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
+import { authService } from '@/services/auth.service';
 import { Input } from '@/components/auth/Input';
 import { Button } from '@/components/auth/Button';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 
 export default function SignInPage() {
   const router = useRouter();
-  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -22,7 +21,7 @@ export default function SignInPage() {
     setIsLoading(true);
 
     try {
-      const result = await login({ email, password });
+      const result = await authService.login({ email, password });
       
       if (result.success) {
         router.push('/dashboard');

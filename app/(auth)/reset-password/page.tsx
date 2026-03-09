@@ -3,7 +3,7 @@
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
+import { authService } from '@/services/auth.service';
 import { Input } from '@/components/auth/Input';
 import { Button } from '@/components/auth/Button';
 import { AuthLayout } from '@/components/auth/AuthLayout';
@@ -11,7 +11,6 @@ import { AuthLayout } from '@/components/auth/AuthLayout';
 function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { resetPassword } = useAuth();
   const token = searchParams.get('token') || '';
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -41,7 +40,7 @@ function ResetPasswordContent() {
     setIsLoading(true);
 
     try {
-      const result = await resetPassword({ token, password });
+      const result = await authService.resetPassword({ token, password });
       
       if (result.success) {
         setSuccess(true);

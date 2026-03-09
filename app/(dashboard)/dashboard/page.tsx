@@ -1,22 +1,34 @@
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { authService } from '@/services/auth.service';
+import { User } from '@/types/auth';
 import { Button } from '@/components/auth/Button';
 
 export default function DashboardPage() {
-  const { user, logout, isLoading } = useAuth();
   const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      router.push('/signin');
-    }
-  }, [user, isLoading, router]);
+    authService.me()
+      .then((userData) => {
+        setUser(userData);
+        if (!userData) {
+          router.push('/signin');
+        }
+      })
+      .catch(() => {
+        router.push('/signin');
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [router]);
 
   const handleLogout = async () => {
-    await logout();
+    await authService.logout();
     router.push('/signin');
   };
 
@@ -26,6 +38,10 @@ export default function DashboardPage() {
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
       </div>
     );
+  }
+
+  if (!user) {
+    return null;
   }
 
   return (
@@ -45,13 +61,13 @@ export default function DashboardPage() {
         <div className="px-4 py-6 sm:px-0">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow px-5 py-6">
             <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              Welcome, {user?.name}!
+              Welcome, {user.name}!
             </h2>
             <p className="text-gray-600 dark:text-gray-400">
-              Email: {user?.email}
+              Email: {user.email}
             </p>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Email verified: {user?.emailVerified ? 'Yes' : 'No'}
+              Email verified: {user.emailVerified ? 'Yes' : 'No'}
             </p>
           </div>
         </div>

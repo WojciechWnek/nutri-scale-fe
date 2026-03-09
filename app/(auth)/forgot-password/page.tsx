@@ -2,13 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
+import { authService } from '@/services/auth.service';
 import { Input } from '@/components/auth/Input';
 import { Button } from '@/components/auth/Button';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 
 export default function ForgotPasswordPage() {
-  const { forgotPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -20,7 +19,7 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
 
     try {
-      const result = await forgotPassword({ email });
+      const result = await authService.forgotPassword({ email });
       
       if (result.success) {
         setSuccess(true);

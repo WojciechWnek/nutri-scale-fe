@@ -3,14 +3,13 @@
 import { useState, Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
+import { authService } from '@/services/auth.service';
 import { Button } from '@/components/auth/Button';
 import { Input } from '@/components/auth/Input';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 
 function EmailVerifyContent() {
   const searchParams = useSearchParams();
-  const { verifyEmail } = useAuth();
   const email = searchParams.get('email') || '';
   const token = searchParams.get('token') || '';
   const [verificationToken, setVerificationToken] = useState('');
@@ -22,7 +21,7 @@ function EmailVerifyContent() {
   useEffect(() => {
     if (token && !autoVerified) {
       setIsLoading(true);
-      verifyEmail({ token })
+      authService.verifyEmail({ token })
         .then((result) => {
           if (result.success) {
             setSuccess(true);
@@ -38,14 +37,14 @@ function EmailVerifyContent() {
           setIsLoading(false);
         });
     }
-  }, [token, autoVerified, verifyEmail]);
+  }, [token, autoVerified]);
 
   const handleVerify = async (tokenToVerify: string) => {
     setError('');
     setIsLoading(true);
 
     try {
-      const result = await verifyEmail({ token: tokenToVerify });
+      const result = await authService.verifyEmail({ token: tokenToVerify });
       
       if (result.success) {
         setSuccess(true);
