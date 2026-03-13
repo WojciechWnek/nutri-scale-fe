@@ -1,4 +1,4 @@
-import { get, post, del } from "@/lib/http";
+import { get, post, del, HttpError } from "@/lib/http";
 import { endpoints } from "@/config/endpoints";
 import {
   User,
@@ -10,21 +10,43 @@ import {
   VerifyEmailData,
 } from "@/types/auth";
 
+function handleAuthError(error: unknown): AuthResponse {
+  if (error instanceof HttpError) {
+    const errorData = error.data as { message?: string } | undefined;
+    return {
+      success: false,
+      message: errorData?.message || error.message || "An error occurred",
+    };
+  }
+  return { success: false, message: "An unexpected error occurred" };
+}
+
 export const authService = {
   async signin(credentials: LoginCredentials): Promise<AuthResponse> {
-    const data = await post<{
-      accessToken: string;
-      refreshToken: string;
-      user: User;
-    }>(endpoints.auth.signin, credentials);
+    try {
+      const data = await post<{
+        accessToken: string;
+        refreshToken: string;
+        user: User;
+      }>(endpoints.auth.signin, credentials);
 
-    return { success: true, user: data.user, accessToken: data.accessToken };
+      return { success: true, user: data.user, accessToken: data.accessToken };
+    } catch (error) {
+      return handleAuthError(error);
+    }
   },
 
   async signup(data: RegisterData): Promise<AuthResponse> {
-    const result = await post<{ message: string }>(endpoints.auth.signup, data);
+    try {
+      const result = await post<{ message: string }>(
+        endpoints.auth.signup,
+        data,
+      );
 
-    return { success: true, message: result.message };
+      return { success: true, message: result.message };
+    } catch (error) {
+      return handleAuthError(error);
+    }
   },
 
   async logout(): Promise<void> {
@@ -36,39 +58,55 @@ export const authService = {
   },
 
   async forgotPassword(data: ForgotPasswordData): Promise<AuthResponse> {
-    const result = await post<{ message: string }>(
-      endpoints.auth.forgotPassword,
-      data,
-    );
+    try {
+      const result = await post<{ message: string }>(
+        endpoints.auth.forgotPassword,
+        data,
+      );
 
-    return { success: true, message: result.message };
+      return { success: true, message: result.message };
+    } catch (error) {
+      return handleAuthError(error);
+    }
   },
 
   async resetPassword(data: ResetPasswordData): Promise<AuthResponse> {
-    const result = await post<{ message: string }>(
-      endpoints.auth.resetPassword,
-      data,
-    );
+    try {
+      const result = await post<{ message: string }>(
+        endpoints.auth.resetPassword,
+        data,
+      );
 
-    return { success: true, message: result.message };
+      return { success: true, message: result.message };
+    } catch (error) {
+      return handleAuthError(error);
+    }
   },
 
   async verifyEmail(data: VerifyEmailData): Promise<AuthResponse> {
-    const result = await post<{ message: string }>(
-      endpoints.auth.verifyEmail,
-      data,
-    );
+    try {
+      const result = await post<{ message: string }>(
+        endpoints.auth.verifyEmail,
+        data,
+      );
 
-    return { success: true, message: result.message };
+      return { success: true, message: result.message };
+    } catch (error) {
+      return handleAuthError(error);
+    }
   },
 
   async resendVerification(email: string): Promise<AuthResponse> {
-    const result = await post<{ message: string }>(
-      endpoints.auth.resendVerification,
-      { email },
-    );
+    try {
+      const result = await post<{ message: string }>(
+        endpoints.auth.resendVerification,
+        { email },
+      );
 
-    return { success: true, message: result.message };
+      return { success: true, message: result.message };
+    } catch (error) {
+      return handleAuthError(error);
+    }
   },
 
   async me(): Promise<User | null> {
