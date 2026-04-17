@@ -124,15 +124,26 @@ export default function SignInPage() {
             Sign in
           </Button>
 
-          <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-            Do not have an account?{" "}
-            <Link
-              href="/signup"
-              className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
-            >
-              Sign up
-            </Link>
-          </p>
+          <div className="space-y-2 text-center text-sm text-gray-600 dark:text-gray-400">
+            <p>
+              Do not have an account?{" "}
+              <Link
+                href="/signup"
+                className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+              >
+                Sign up
+              </Link>
+            </p>
+            <p>
+              Didn't receive a verification email?{" "}
+              <Link
+                href="/verify-email"
+                className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+              >
+                Resend it
+              </Link>
+            </p>
+          </div>
         </form>
       </Form>
     </AuthLayout>
