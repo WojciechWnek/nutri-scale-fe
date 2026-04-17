@@ -87,7 +87,8 @@ export const authService = {
     try {
       const result = await post<{ message: string }>(
         endpoints.auth.verifyEmail,
-        data,
+        undefined,
+        { params: { token: data.token } }
       );
 
       return { success: true, message: result.message };

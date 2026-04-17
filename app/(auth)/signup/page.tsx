@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
+import { Loader2 } from "lucide-react";
 
 const signUpSchema = z
   .object({
@@ -37,6 +38,10 @@ export default function SignUpPage() {
   const [serverError, setServerError] = React.useState<string>("");
   const [success, setSuccess] = React.useState(false);
   const [email, setEmail] = React.useState("");
+
+  const [isResending, setIsResending] = React.useState(false);
+  const [resendStatus, setResendStatus] = React.useState<"idle" | "success" | "error">("idle");
+  const [resendMessage, setResendMessage] = React.useState("");
 
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
@@ -72,6 +77,26 @@ export default function SignUpPage() {
     }
   }
 
+  const handleResend = async () => {
+    setIsResending(true);
+    setResendStatus("idle");
+    try {
+      const result = await authService.resendVerification(email);
+      if (result.success) {
+        setResendStatus("success");
+        setResendMessage("Verification email sent! Please check your inbox.");
+      } else {
+        setResendStatus("error");
+        setResendMessage(result.message || "Failed to resend email.");
+      }
+    } catch {
+      setResendStatus("error");
+      setResendMessage("An unexpected error occurred.");
+    } finally {
+      setIsResending(false);
+    }
+  };
+
   if (success) {
     return (
       <AuthLayout
@@ -103,11 +128,40 @@ export default function SignUpPage() {
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Please verify your email before signing in.
           </p>
-          <Link href="/signin">
-            <Button variant="outline" className="mt-4">
-              Go to Sign in
+
+          {resendStatus === "success" && (
+            <div className="p-3 text-sm text-green-700 bg-green-50 dark:bg-green-900/20 rounded-lg">
+              {resendMessage}
+            </div>
+          )}
+          {resendStatus === "error" && (
+            <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              {resendMessage}
+            </div>
+          )}
+
+          <div className="pt-4 space-y-3">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleResend}
+              disabled={isResending || resendStatus === "success"}
+            >
+              {isResending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                "Resend verification email"
+              )}
             </Button>
-          </Link>
+            <Link href="/signin" className="block">
+              <Button className="w-full">
+                Go to Sign in
+              </Button>
+            </Link>
+          </div>
         </div>
       </AuthLayout>
     );
