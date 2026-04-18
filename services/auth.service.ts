@@ -1,7 +1,6 @@
-import { get, post, del, HttpError } from "@/lib/http";
+import { post, del, HttpError } from "@/lib/http";
 import { endpoints } from "@/config/endpoints";
 import {
-  User,
   AuthResponse,
   LoginCredentials,
   RegisterData,
@@ -49,7 +48,7 @@ export const authService = {
 
   async logout(): Promise<void> {
     try {
-      await del(endpoints.auth.signout);
+      await post(endpoints.auth.signout);
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -105,15 +104,6 @@ export const authService = {
       return { success: true, message: result.message };
     } catch (error) {
       return handleAuthError(error);
-    }
-  },
-
-  async me(): Promise<User | null> {
-    try {
-      const data = await get<{ user: User }>(endpoints.auth.me);
-      return data.user;
-    } catch {
-      return null;
     }
   },
 };
