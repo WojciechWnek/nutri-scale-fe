@@ -24,13 +24,11 @@ function handleAuthError(error: unknown): AuthResponse {
 export const authService = {
   async signin(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      const data = await post<{
-        accessToken: string;
-        refreshToken: string;
-        user: User;
-      }>(endpoints.auth.signin, credentials);
+      const data = await post<any>(endpoints.auth.signin, credentials);
 
-      return { success: true, user: data.user, accessToken: data.accessToken };
+      const user = data.user || data;
+
+      return { success: true, user };
     } catch (error) {
       return handleAuthError(error);
     }
@@ -88,7 +86,7 @@ export const authService = {
       const result = await post<{ message: string }>(
         endpoints.auth.verifyEmail,
         undefined,
-        { params: { token: data.token } }
+        { params: { token: data.token } },
       );
 
       return { success: true, message: result.message };

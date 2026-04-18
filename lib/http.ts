@@ -16,6 +16,14 @@ class HttpError extends Error {
   }
 }
 
+let isRefreshing = false;
+let refreshSubscribers: ((error: Error | null) => void)[] = [];
+
+function onRefreshed(error: Error | null) {
+  refreshSubscribers.forEach((callback) => callback(error));
+  refreshSubscribers = [];
+}
+
 async function request<T>(
   endpoint: string,
   options: RequestOptions = {},
@@ -34,11 +42,59 @@ async function request<T>(
     ...fetchOptions.headers,
   };
 
-  const response = await fetch(url, {
+  let response = await fetch(url, {
     ...fetchOptions,
     credentials: "include",
     headers,
   });
+
+  // Handle 401 Unauthorized by attempting to refresh the token
+  if (
+    response.status === 401 &&
+    endpoint !== "/auth/signin" &&
+    endpoint !== "/auth/refresh"
+  ) {
+    if (!isRefreshing) {
+      isRefreshing = true;
+      try {
+        const refreshResponse = await fetch(`${API_URL}/auth/refresh`, {
+          method: "POST",
+          credentials: "include", // This will send the HttpOnly refresh_token cookie
+        });
+
+        if (!refreshResponse.ok) {
+          throw new Error("Refresh failed");
+        }
+
+        onRefreshed(null);
+      } catch (err) {
+        onRefreshed(err as Error);
+        // Force redirect to login if refresh fails
+        if (typeof window !== "undefined") {
+          window.location.href = "/signin";
+        }
+        throw new HttpError(401, "Unauthorized", "Session expired");
+      } finally {
+        isRefreshing = false;
+      }
+    } else {
+      // Wait for the ongoing refresh to finish
+      const refreshError = await new Promise<Error | null>((resolve) => {
+        refreshSubscribers.push(resolve);
+      });
+
+      if (refreshError) {
+        throw new HttpError(401, "Unauthorized", "Session expired");
+      }
+    }
+
+    // Retry the original request after successful token refresh
+    response = await fetch(url, {
+      ...fetchOptions,
+      credentials: "include",
+      headers,
+    });
+  }
 
   const data = await response.json().catch(() => null);
 
