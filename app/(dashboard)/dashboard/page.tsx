@@ -1,10 +1,11 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { authService } from '@/services/auth.service';
-import { User } from '@/types/auth';
-import { Button } from '@/components/auth/Button';
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { authService } from "@/services/auth.service";
+import { User } from "@/types/auth";
+import { Button } from "@/components/auth/Button";
+import { userService } from "@/services/user.service";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -12,15 +13,10 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    authService.me()
+    userService
+      .me()
       .then((userData) => {
         setUser(userData);
-        if (!userData) {
-          router.push('/signin');
-        }
-      })
-      .catch(() => {
-        router.push('/signin');
       })
       .finally(() => {
         setIsLoading(false);
@@ -29,7 +25,7 @@ export default function DashboardPage() {
 
   const handleLogout = async () => {
     await authService.logout();
-    router.push('/signin');
+    router.push("/signin");
   };
 
   if (isLoading) {
@@ -41,6 +37,7 @@ export default function DashboardPage() {
   }
 
   if (!user) {
+    router.push("/signin");
     return null;
   }
 
@@ -49,7 +46,9 @@ export default function DashboardPage() {
       <nav className="bg-white dark:bg-gray-800 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+              Dashboard
+            </h1>
             <Button onClick={handleLogout} variant="outline" size="sm">
               Sign out
             </Button>
@@ -66,9 +65,7 @@ export default function DashboardPage() {
             <p className="text-gray-600 dark:text-gray-400">
               Email: {user.email}
             </p>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Email verified: {user.emailVerified ? 'Yes' : 'No'}
-            </p>
+            <p className="text-gray-600 dark:text-gray-400 mt-2"></p>
           </div>
         </div>
       </main>
