@@ -20,13 +20,13 @@ export function proxy(request: NextRequest) {
     "/favicon.ico",
   ];
 
-  const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
+  const isPublicPath = pathname === "/" || publicPaths.some((path) => pathname.startsWith(path));
 
   if (!isAuthenticated && !isPublicPath) {
     return NextResponse.redirect(new URL("/signin", request.url));
   }
 
-  if (isAuthenticated && (pathname === "/signin" || pathname === "/signup")) {
+  if (isAuthenticated && (pathname === "/signin" || pathname === "/signup" || pathname === "/")) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
