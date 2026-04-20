@@ -13,14 +13,18 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    userService
-      .me()
-      .then((userData) => {
+    const fetchUser = async () => {
+      try {
+        const userData = await userService.me();
         setUser(userData);
-      })
-      .finally(() => {
+      } catch (error) {
+        router.push("/signin");
+      } finally {
         setIsLoading(false);
-      });
+      }
+    };
+
+    fetchUser();
   }, [router]);
 
   const handleLogout = async () => {
@@ -34,11 +38,6 @@ export default function DashboardPage() {
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
       </div>
     );
-  }
-
-  if (!user) {
-    router.push("/signin");
-    return null;
   }
 
   return (
@@ -60,10 +59,10 @@ export default function DashboardPage() {
         <div className="px-4 py-6 sm:px-0">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow px-5 py-6">
             <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-              Welcome, {user.name}!
+              Welcome, {user?.email}!
             </h2>
             <p className="text-gray-600 dark:text-gray-400">
-              Email: {user.email}
+              Email: {user?.email}
             </p>
             <p className="text-gray-600 dark:text-gray-400 mt-2"></p>
           </div>
