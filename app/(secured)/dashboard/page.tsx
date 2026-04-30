@@ -17,7 +17,7 @@ export default function DashboardPage() {
       try {
         const userData = await userService.me();
         setUser(userData);
-      } catch (error) {
+      } catch {
         router.push("/signin");
       } finally {
         setIsLoading(false);
@@ -48,9 +48,14 @@ export default function DashboardPage() {
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">
               Dashboard
             </h1>
-            <Button onClick={handleLogout} variant="outline" size="sm">
-              Sign out
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button onClick={() => router.push("/upload-pdf")} variant="ghost" size="sm">
+                Upload PDF
+              </Button>
+              <Button onClick={handleLogout} variant="outline" size="sm">
+                Sign out
+              </Button>
+            </div>
           </div>
         </div>
       </nav>
