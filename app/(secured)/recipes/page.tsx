@@ -6,6 +6,7 @@ import { ArrowRight, ChefHat, FileText, RefreshCw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { UndoDeleteToast } from "@/components/undo-toast";
 import { Recipe, recipesService } from "@/services/recipes.service";
 
 export default function RecipesPage() {
@@ -32,21 +33,45 @@ export default function RecipesPage() {
     }
   };
 
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
+  const handleDelete = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
 
-    setDeletingId(id);
+    const recipe = recipes.find((r) => r.id === id);
+    if (!recipe) return;
 
-    try {
-      await recipesService.remove(id);
-      setRecipes((current) => current.filter((r) => r.id !== id));
-      toast.success("Recipe deleted");
-    } catch {
-      toast.error("Could not delete recipe.");
-    } finally {
-      setDeletingId(null);
-    }
+    setDeletingId(id);
+    setRecipes((current) => current.filter((r) => r.id !== id));
+
+    let restored = false;
+
+    const toastId = toast.custom(
+      (t) => (
+        <UndoDeleteToast
+          message="Recipe deleted"
+          onUndo={() => {
+            restored = true;
+            setRecipes((current) => [...current, recipe]);
+            setDeletingId(null);
+            toast.dismiss(t);
+          }}
+          onExpire={async () => {
+            if (restored) return;
+
+            try {
+              await recipesService.remove(id);
+              toast.dismiss(t);
+            } catch {
+              setRecipes((current) => [...current, recipe]);
+              toast.error("Could not delete recipe.");
+            }
+
+            setDeletingId(null);
+          }}
+        />
+      ),
+      { duration: Infinity },
+    );
   };
 
   useEffect(() => {

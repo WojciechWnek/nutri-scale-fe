@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, ChefHat, Clock, ListChecks, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 
+import { UndoDeleteToast } from "@/components/undo-toast";
 import { Recipe, recipesService } from "@/services/recipes.service";
 
 export default function RecipeDetailsPage() {
@@ -43,17 +44,35 @@ export default function RecipeDetailsPage() {
 
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     setIsDeleting(true);
+    let deleted = false;
 
-    try {
-      await recipesService.remove(params.id);
-      toast.success("Recipe deleted");
-      router.push("/recipes");
-    } catch {
-      toast.error("Could not delete recipe.");
-      setIsDeleting(false);
-    }
+    toast.custom(
+      (t) => (
+        <UndoDeleteToast
+          message="Recipe deleted"
+          onUndo={() => {
+            setIsDeleting(false);
+            toast.dismiss(t);
+          }}
+          onExpire={async () => {
+            if (deleted) return;
+            deleted = true;
+
+            try {
+              await recipesService.remove(params.id);
+              toast.dismiss(t);
+              router.push("/recipes");
+            } catch {
+              setIsDeleting(false);
+              toast.error("Could not delete recipe.");
+            }
+          }}
+        />
+      ),
+      { duration: Infinity },
+    );
   };
 
   const toggleIngredient = (ingredientKey: string) => {
