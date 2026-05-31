@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CheckCircle2, FileText, Upload, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { uploadService } from "@/services/upload.service";
 
 const MAX_FILE_SIZE_MB = 20;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
@@ -21,11 +22,14 @@ export default function UploadPdfPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
     setError("");
+    setSuccessMessage("");
 
     if (!file) {
       setSelectedFile(null);
@@ -55,9 +59,37 @@ export default function UploadPdfPage() {
   const clearSelectedFile = () => {
     setSelectedFile(null);
     setError("");
+    setSuccessMessage("");
 
     if (inputRef.current) {
       inputRef.current.value = "";
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile || isUploading) {
+      return;
+    }
+
+    setError("");
+    setSuccessMessage("");
+    setIsUploading(true);
+
+    try {
+      const result = await uploadService.pdf(selectedFile);
+      setSuccessMessage(
+        result.jobId
+          ? `PDF uploaded successfully. Job ID: ${result.jobId}`
+          : result.message || "PDF uploaded successfully.",
+      );
+    } catch (uploadError) {
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : "PDF upload failed. Please try again.",
+      );
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -71,9 +103,20 @@ export default function UploadPdfPage() {
             </p>
             <h1 className="text-xl font-bold">Upload PDF</h1>
           </div>
-          <Button variant="outline" size="sm">
-            <Link href="/dashboard">Dashboard</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/recipes"
+              className="inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-800"
+            >
+              Recipes
+            </Link>
+            <Link
+              href="/dashboard"
+              className="inline-flex h-9 items-center justify-center rounded-md border border-gray-300 bg-transparent px-3 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-800"
+            >
+              Dashboard
+            </Link>
+          </div>
         </div>
       </nav>
 
@@ -115,6 +158,18 @@ export default function UploadPdfPage() {
             </p>
           )}
 
+          {successMessage && (
+            <div className="mt-4 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700 dark:border-green-900 dark:bg-green-950 dark:text-green-300">
+              <p>{successMessage}</p>
+              <Link
+                href="/recipes"
+                className="mt-2 inline-flex font-medium text-green-800 underline-offset-4 hover:underline dark:text-green-200"
+              >
+                View available recipes
+              </Link>
+            </div>
+          )}
+
           {selectedFile && (
             <div className="mt-4 flex items-center justify-between gap-4 rounded-md border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-900">
               <div className="flex min-w-0 items-center gap-3">
@@ -144,9 +199,14 @@ export default function UploadPdfPage() {
           )}
 
           <div className="mt-6 flex justify-end">
-            <Button type="button" disabled={!selectedFile}>
+            <Button
+              type="button"
+              disabled={!selectedFile}
+              isLoading={isUploading}
+              onClick={handleUpload}
+            >
               <CheckCircle2 className="mr-2 h-4 w-4" aria-hidden="true" />
-              Continue
+              Upload PDF
             </Button>
           </div>
         </section>

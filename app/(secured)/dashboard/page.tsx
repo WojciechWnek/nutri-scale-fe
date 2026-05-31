@@ -49,6 +49,9 @@ export default function DashboardPage() {
               Dashboard
             </h1>
             <div className="flex items-center gap-3">
+              <Button onClick={() => router.push("/recipes")} variant="ghost" size="sm">
+                Recipes
+              </Button>
               <Button onClick={() => router.push("/upload-pdf")} variant="ghost" size="sm">
                 Upload PDF
               </Button>

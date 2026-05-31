@@ -37,8 +37,9 @@ async function request<T>(
     url += `?${searchParams.toString()}`;
   }
 
+  const isFormData = fetchOptions.body instanceof FormData;
   const headers: HeadersInit = {
-    "Content-Type": "application/json",
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...fetchOptions.headers,
   };
 
@@ -122,10 +123,16 @@ export async function post<T>(
   body?: unknown,
   options?: RequestOptions,
 ): Promise<T> {
+  const requestBody = body instanceof FormData
+    ? body
+    : body
+      ? JSON.stringify(body)
+      : undefined;
+
   return request<T>(endpoint, {
     ...options,
     method: "POST",
-    body: body ? JSON.stringify(body) : undefined,
+    body: requestBody,
   });
 }
 

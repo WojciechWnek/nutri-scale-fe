@@ -15,4 +15,12 @@ export const endpoints = {
     allUser: "/users",
     singleUser: (id: string) => `/users/${id}`,
   },
+  recipes: {
+    all: "/recipes",
+    single: (id: string) => `/recipes/${id}`,
+  },
+  upload: {
+    pdf: "/upload/pdf",
+    status: (jobId: string) => `/upload/status/${jobId}`,
+  },
 } as const;
