@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowLeft, ChefHat, Clock, ListChecks, Trash2, Users } from "lucide-react";
+import { toast } from "sonner";
 
 import { Recipe, recipesService } from "@/services/recipes.service";
 
@@ -43,17 +44,14 @@ export default function RecipeDetailsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (!window.confirm("Delete this recipe?")) {
-      return;
-    }
-
     setIsDeleting(true);
 
     try {
       await recipesService.remove(params.id);
+      toast.success("Recipe deleted");
       router.push("/recipes");
     } catch {
-      setError("Could not delete recipe.");
+      toast.error("Could not delete recipe.");
       setIsDeleting(false);
     }
   };

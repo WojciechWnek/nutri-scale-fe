@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, ChefHat, FileText, RefreshCw, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Recipe, recipesService } from "@/services/recipes.service";
@@ -35,17 +36,14 @@ export default function RecipesPage() {
     e.preventDefault();
     e.stopPropagation();
 
-    if (!window.confirm("Delete this recipe?")) {
-      return;
-    }
-
     setDeletingId(id);
 
     try {
       await recipesService.remove(id);
       setRecipes((current) => current.filter((r) => r.id !== id));
+      toast.success("Recipe deleted");
     } catch {
-      setError("Could not delete recipe.");
+      toast.error("Could not delete recipe.");
     } finally {
       setDeletingId(null);
     }

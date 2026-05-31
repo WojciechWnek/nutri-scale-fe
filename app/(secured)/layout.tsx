@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { authService } from "@/services/auth.service";
+import { Toaster } from "@/components/ui/toaster";
 
 const navLinks = [
   { href: "/dashboard", label: "Dashboard" },
@@ -59,6 +60,7 @@ export default function SecuredLayout({ children }: { children: React.ReactNode 
         </div>
       </nav>
       {children}
+      <Toaster />
     </div>
   );
 }
