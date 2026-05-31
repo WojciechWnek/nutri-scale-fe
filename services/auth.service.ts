@@ -54,6 +54,14 @@ export const authService = {
     }
   },
 
+  async signoutAll(): Promise<void> {
+    try {
+      await post(endpoints.auth.signoutAll);
+    } catch (error) {
+      console.error("Signout all error:", error);
+    }
+  },
+
   async forgotPassword(data: ForgotPasswordData): Promise<AuthResponse> {
     try {
       const result = await post<{ message: string }>(

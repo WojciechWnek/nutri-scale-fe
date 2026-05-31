@@ -11,10 +11,20 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { ChefHat } from "lucide-react";
+import { AlertTriangle, ChefHat, LogOut } from "lucide-react";
 
+import { authService } from "@/services/auth.service";
 import { Recipe, recipesService } from "@/services/recipes.service";
 import { userService } from "@/services/user.service";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { User } from "@/types/auth";
 
 interface DayCount {
@@ -42,10 +52,7 @@ function aggregateDaily(recipes: Recipe[]): DayCount[] {
 
     days.push({
       date: key,
-      label: date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      }),
+      label: date.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
       count: counts[key] || 0,
     });
   }
@@ -58,6 +65,8 @@ export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showSignoutAll, setShowSignoutAll] = useState(false);
+  const [isSigningOutAll, setIsSigningOutAll] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -83,6 +92,12 @@ export default function DashboardPage() {
   const totalRecipes = recipes.length;
   const weekCount = chartData.slice(-7).reduce((sum, d) => sum + d.count, 0);
 
+  const handleSignoutAll = async () => {
+    setIsSigningOutAll(true);
+    await authService.signoutAll();
+    router.push("/signin");
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -93,13 +108,22 @@ export default function DashboardPage() {
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Dashboard
-        </h1>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-          Welcome back, {user?.email?.split("@")[0] || "chef"}
-        </p>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Dashboard
+          </h1>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            Welcome back, {user?.email?.split("@")[0] || "chef"}
+          </p>
+        </div>
+        <button
+          onClick={() => setShowSignoutAll(true)}
+          className="inline-flex h-9 items-center justify-center rounded-md px-3 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200"
+        >
+          <LogOut className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+          Sign out all
+        </button>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -188,10 +212,7 @@ export default function DashboardPage() {
 
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={chartData}
-              margin={{ top: 4, right: 8, bottom: 0, left: -16 }}
-            >
+            <BarChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke="currentColor"
@@ -234,6 +255,40 @@ export default function DashboardPage() {
           </ResponsiveContainer>
         </div>
       </div>
+
+      <Dialog open={showSignoutAll} onOpenChange={setShowSignoutAll}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400">
+                <AlertTriangle className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <DialogTitle>Sign out everywhere</DialogTitle>
+            </div>
+            <DialogDescription className="mt-4">
+              This will sign you out from all devices and sessions. You will need to sign in again on every device.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowSignoutAll(false)}
+              disabled={isSigningOutAll}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleSignoutAll}
+              isLoading={isSigningOutAll}
+            >
+              Sign out everywhere
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <style jsx>{`
         :global(.recharts-tooltip-wrapper) {
