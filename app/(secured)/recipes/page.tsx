@@ -35,29 +35,21 @@ export default function RecipesPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-white">
-      <nav className="border-b border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-blue-600 dark:text-blue-400">
-              Recipes
-            </p>
-            <h1 className="text-xl font-bold">Available recipes</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button type="button" variant="ghost" size="sm" onClick={fetchRecipes}>
-              <RefreshCw className="mr-2 h-4 w-4" aria-hidden="true" />
-              Refresh
-            </Button>
-            <Link
-              href="/upload-pdf"
-              className="inline-flex h-9 items-center justify-center rounded-md border border-gray-300 bg-transparent px-3 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-800"
-            >
-              Upload PDF
-            </Link>
-          </div>
+    <>
+      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 pt-8 sm:px-6 lg:px-8">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wide text-blue-600 dark:text-blue-400">
+            Recipes
+          </p>
+          <h1 className="text-xl font-bold">Available recipes</h1>
         </div>
-      </nav>
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="ghost" size="sm" onClick={fetchRecipes}>
+            <RefreshCw className="mr-2 h-4 w-4" aria-hidden="true" />
+            Refresh
+          </Button>
+        </div>
+      </div>
 
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         {isLoading && (
@@ -125,6 +117,6 @@ export default function RecipesPage() {
           </div>
         )}
       </main>
-    </div>
+    </>
   );
 }

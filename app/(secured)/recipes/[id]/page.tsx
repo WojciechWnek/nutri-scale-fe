@@ -54,24 +54,16 @@ export default function RecipeDetailsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-white">
-      <nav className="border-b border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link
-            href="/recipes"
-            className="inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-800"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
-            Recipes
-          </Link>
-          <Link
-            href="/upload-pdf"
-            className="inline-flex h-9 items-center justify-center rounded-md border border-gray-300 bg-transparent px-3 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-800"
-          >
-            Upload PDF
-          </Link>
-        </div>
-      </nav>
+    <>
+      <div className="mx-auto max-w-5xl px-4 pt-8 sm:px-6 lg:px-8">
+        <Link
+          href="/recipes"
+          className="inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
+          Recipes
+        </Link>
+      </div>
 
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         {isLoading && (
@@ -196,6 +188,6 @@ export default function RecipeDetailsPage() {
           </article>
         )}
       </main>
-    </div>
+    </>
   );
 }

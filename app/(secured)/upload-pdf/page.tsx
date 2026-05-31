@@ -94,31 +94,13 @@ export default function UploadPdfPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-white">
-      <nav className="border-b border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-blue-600 dark:text-blue-400">
-              Documents
-            </p>
-            <h1 className="text-xl font-bold">Upload PDF</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link
-              href="/recipes"
-              className="inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-800"
-            >
-              Recipes
-            </Link>
-            <Link
-              href="/dashboard"
-              className="inline-flex h-9 items-center justify-center rounded-md border border-gray-300 bg-transparent px-3 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-800"
-            >
-              Dashboard
-            </Link>
-          </div>
-        </div>
-      </nav>
+    <>
+      <div className="mx-auto max-w-3xl px-4 pt-8 sm:px-6 lg:px-8">
+        <p className="text-xs font-medium uppercase tracking-wide text-blue-600 dark:text-blue-400">
+          Documents
+        </p>
+        <h1 className="text-xl font-bold">Upload PDF</h1>
+      </div>
 
       <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
         <section className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -211,6 +193,6 @@ export default function UploadPdfPage() {
           </div>
         </section>
       </main>
-    </div>
+    </>
   );
 }
