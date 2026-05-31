@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ChefHat, Clock, ListChecks, Trash2, Users } from "lucide-react";
+import { ArrowLeft, Check, ChefHat, Clock, ListChecks, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 
 import { UndoDeleteToast } from "@/components/undo-toast";
@@ -174,23 +174,50 @@ export default function RecipeDetailsPage() {
                       return (
                         <li
                           key={ingredientKey}
-                          className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900"
+                          className={`rounded-md border px-3 py-2 text-sm transition-colors duration-200 ${
+                            isChecked
+                              ? "border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950"
+                              : "border-gray-200 bg-gray-50 hover:border-blue-200 dark:border-gray-700 dark:bg-gray-900 dark:hover:border-blue-800"
+                          }`}
                         >
-                          <label className="flex cursor-pointer items-center gap-3">
+                          <label className="flex cursor-pointer items-center gap-3 group">
+                            <div
+                              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-all duration-200 ${
+                                isChecked
+                                  ? "border-blue-600 bg-blue-600 dark:border-blue-400 dark:bg-blue-400"
+                                  : "border-gray-300 bg-white group-hover:border-blue-400 dark:border-gray-600 dark:bg-gray-800 dark:group-hover:border-blue-500"
+                              }`}
+                            >
+                              <span
+                                className={`transition-transform duration-200 ${
+                                  isChecked ? "scale-100" : "scale-0"
+                                }`}
+                              >
+                                <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />
+                              </span>
+                            </div>
                             <input
                               type="checkbox"
                               checked={isChecked}
                               onChange={() => toggleIngredient(ingredientKey)}
-                              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800"
+                              className="sr-only"
                             />
                             <span className="min-w-0">
                               <span
-                                className={`font-medium ${isChecked ? "text-gray-500 line-through dark:text-gray-500" : ""}`}
+                                className={`font-medium transition-colors duration-200 ${
+                                  isChecked ? "text-gray-500 line-through dark:text-gray-500" : ""
+                                }`}
                               >
                                 {ingredient.name}
                               </span>
                               {(ingredient.quantity || ingredient.unit) && (
-                                <span className="ml-2 text-gray-600 dark:text-gray-400">
+                                <span
+                                  className={`ml-2 transition-colors duration-200 ${
+                                    isChecked
+                                      ? "text-gray-400 dark:text-gray-500"
+                                      : "text-gray-600 dark:text-gray-400"
+                                  }`}
+                                >
                                   {ingredient.quantity} {ingredient.unit}
                                 </span>
                               )}
