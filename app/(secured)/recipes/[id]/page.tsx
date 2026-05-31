@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ChefHat, Clock, ListChecks, Users } from "lucide-react";
+import { ArrowLeft, ChefHat, Clock, ListChecks, Trash2, Users } from "lucide-react";
 
 import { Recipe, recipesService } from "@/services/recipes.service";
 
 export default function RecipeDetailsPage() {
+  const router = useRouter();
   const params = useParams<{ id: string }>();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,6 +39,24 @@ export default function RecipeDetailsPage() {
 
     fetchRecipe();
   }, [params.id]);
+
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!window.confirm("Delete this recipe?")) {
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      await recipesService.remove(params.id);
+      router.push("/recipes");
+    } catch {
+      setError("Could not delete recipe.");
+      setIsDeleting(false);
+    }
+  };
 
   const toggleIngredient = (ingredientKey: string) => {
     setCheckedIngredients((current) => {
@@ -85,35 +104,44 @@ export default function RecipeDetailsPage() {
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-300">
                   <ChefHat className="h-6 w-6" aria-hidden="true" />
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <h1 className="text-2xl font-bold">{recipe.title}</h1>
                   {recipe.description && (
                     <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-400">
                       {recipe.description}
                     </p>
                   )}
-                  <div className="mt-4 flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-400">
-                    {recipe.servings && (
-                      <span className="inline-flex items-center gap-1">
-                        <Users className="h-4 w-4" aria-hidden="true" />
-                        {recipe.servings}
-                      </span>
-                    )}
-                    {recipe.prepTime && (
-                      <span className="inline-flex items-center gap-1">
-                        <Clock className="h-4 w-4" aria-hidden="true" />
-                        Prep: {recipe.prepTime}
-                      </span>
-                    )}
-                    {recipe.cookTime && (
-                      <span className="inline-flex items-center gap-1">
-                        <Clock className="h-4 w-4" aria-hidden="true" />
-                        Cook: {recipe.cookTime}
-                      </span>
-                    )}
+                    <div className="mt-4 flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-400">
+                      {recipe.servings && (
+                        <span className="inline-flex items-center gap-1">
+                          <Users className="h-4 w-4" aria-hidden="true" />
+                          {recipe.servings}
+                        </span>
+                      )}
+                      {recipe.prepTime && (
+                        <span className="inline-flex items-center gap-1">
+                          <Clock className="h-4 w-4" aria-hidden="true" />
+                          Prep: {recipe.prepTime}
+                        </span>
+                      )}
+                      {recipe.cookTime && (
+                        <span className="inline-flex items-center gap-1">
+                          <Clock className="h-4 w-4" aria-hidden="true" />
+                          Cook: {recipe.cookTime}
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  <button
+                    type="button"
+                    disabled={isDeleting}
+                    onClick={handleDelete}
+                    className="inline-flex h-9 items-center justify-center rounded-md border border-red-200 bg-white px-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:bg-transparent dark:text-red-400 dark:hover:bg-red-950"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    {isDeleting ? "Deleting..." : "Delete"}
+                  </button>
                 </div>
-              </div>
             </header>
 
             <section className="grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">

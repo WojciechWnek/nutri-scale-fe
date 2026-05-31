@@ -18,6 +18,7 @@ export const endpoints = {
   recipes: {
     all: "/recipes",
     single: (id: string) => `/recipes/${id}`,
+    delete: (id: string) => `/recipes/${id}`,
   },
   upload: {
     pdf: "/upload/pdf",

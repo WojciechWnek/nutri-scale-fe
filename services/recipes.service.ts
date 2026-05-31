@@ -1,5 +1,5 @@
 import { endpoints } from "@/config/endpoints";
-import { get } from "@/lib/http";
+import { del, get } from "@/lib/http";
 
 type ApiRecord = Record<string, unknown>;
 
@@ -239,5 +239,9 @@ export const recipesService = {
     }
 
     return normalizeRecipe(data);
+  },
+
+  async remove(id: string): Promise<void> {
+    await del(endpoints.recipes.delete(id));
   },
 };
