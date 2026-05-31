@@ -24,6 +24,14 @@ function onRefreshed(error: Error | null) {
   refreshSubscribers = [];
 }
 
+function clearAuthCookies() {
+  if (typeof document !== "undefined") {
+    const opts = "path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+    document.cookie = `access_token=; ${opts}`;
+    document.cookie = `refresh_token=; ${opts}`;
+  }
+}
+
 async function request<T>(
   endpoint: string,
   options: RequestOptions = {},
@@ -70,7 +78,7 @@ async function request<T>(
         onRefreshed(null);
       } catch (err) {
         onRefreshed(err as Error);
-        // Force redirect to login if refresh fails
+        clearAuthCookies();
         if (typeof window !== "undefined") {
           window.location.href = "/signin";
         }
@@ -85,6 +93,7 @@ async function request<T>(
       });
 
       if (refreshError) {
+        clearAuthCookies();
         throw new HttpError(401, "Unauthorized", "Session expired");
       }
     }
@@ -95,6 +104,10 @@ async function request<T>(
       credentials: "include",
       headers,
     });
+
+    if (response.status === 401) {
+      clearAuthCookies();
+    }
   }
 
   const data = await response.json().catch(() => null);
