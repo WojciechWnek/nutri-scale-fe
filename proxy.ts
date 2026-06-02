@@ -18,15 +18,21 @@ export function proxy(request: NextRequest) {
     "/api/auth",
     "/_next",
     "/favicon.ico",
+    "/privacy",
+    "/terms",
   ];
 
-  const isPublicPath = pathname === "/" || publicPaths.some((path) => pathname.startsWith(path));
+  const isPublicPath =
+    pathname === "/" || publicPaths.some((path) => pathname.startsWith(path));
 
   if (!isAuthenticated && !isPublicPath) {
     return NextResponse.redirect(new URL("/signin", request.url));
   }
 
-  if (isAuthenticated && (pathname === "/signin" || pathname === "/signup" || pathname === "/")) {
+  if (
+    isAuthenticated &&
+    (pathname === "/signin" || pathname === "/signup" || pathname === "/")
+  ) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
