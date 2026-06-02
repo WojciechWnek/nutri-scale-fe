@@ -116,6 +116,14 @@ export default function Home() {
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
           &copy; {new Date().getFullYear()} Nutri Scale. All rights reserved.
         </p>
+        <div className="mt-3 flex items-center justify-center gap-4 text-sm text-zinc-500 dark:text-zinc-400">
+          <Link href="/privacy" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
+            Privacy Policy
+          </Link>
+          <Link href="/terms" className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
+            Terms of Service
+          </Link>
+        </div>
       </footer>
     </div>
   );
