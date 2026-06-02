@@ -28,6 +28,19 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
           {children}
         </div>
+        <div className="mt-8 text-center text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex items-center justify-center gap-4">
+            <Link href="/privacy" className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              Privacy Policy
+            </Link>
+            <Link href="/terms" className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              Terms of Service
+            </Link>
+          </div>
+          <p className="mt-2">
+            &copy; {new Date().getFullYear()} Nutri Scale. All rights reserved.
+          </p>
+        </div>
       </div>
     </div>
   );
